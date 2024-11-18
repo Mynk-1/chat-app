@@ -35,7 +35,7 @@ const ChatApp = () => {
           `https://chat-app-backend-weld-two.vercel.app/api/profile`,
           { withCredentials: true }
         );
-        
+        console.log(response.data.phoneNumber)
         const newSocket = connectSocket(response.data.phoneNumber);
         setNumber(response.data.phoneNumber);
         setSocket(newSocket);

@@ -25,7 +25,6 @@ const navigate = useNavigate();
         credentials: 'include',
         body: JSON.stringify({
           phoneNumber
-          
         })
       });
 
