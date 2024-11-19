@@ -26,15 +26,33 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
   const fetchChatList = async () => {
     console.log("Fetching chat list...");
     try {
-      const response = await axios.get('https://chat-app-backend-2vt3.onrender.com/api/get-contact', {
-        withCredentials: true,
-      });
+      // Retrieve the token from localStorage
+      const token = localStorage.getItem('token');
+    
+      // Check if the token exists
+      if (!token) {
+        throw new Error('No token found, please log in.');
+      }
+    
+      // Send the request with the Authorization header
+      const response = await axios.get(
+        'https://chat-app-backend-2vt3.onrender.com/api/get-contact',
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,  // Attach JWT token in the Authorization header
+            'Content-Type': 'application/json'   // Optional: Set content type for the request
+          }
+        }
+      );
+    
+      // Set the chats received from the backend
       setChats(response.data || []);
       console.log("Chat list fetched:", response.data);
     } catch (err) {
       console.error('Failed to fetch chat list', err);
       setChats([]);
     }
+    
   };
 
   const handleAddUser = () => {
