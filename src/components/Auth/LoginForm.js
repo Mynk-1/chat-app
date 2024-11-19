@@ -18,31 +18,36 @@ const navigate = useNavigate();
     setError('');
 
     try {
-      
       const response = await fetch('https://chat-app-backend-2vt3.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'include', // If you're still using credentials for cookies or other session-related headers
         body: JSON.stringify({
           phoneNumber
-          
         })
       });
-
+    
       const data = await response.json();
-
+    
       if (!data.success) {
         throw new Error(data.message);
       }
-
-      setUserDetails(data.user)
+    
+      // Store the token in localStorage
+      localStorage.setItem('token', data.token); // Save the JWT token to localStorage
+    
+      // Set user details in state or context (for example)
+      setUserDetails(data.user);
+      
+      // Navigate to the chat page
       navigate("/chat");
-
+    
     } catch (err) {
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
+    
   };
 
   return (

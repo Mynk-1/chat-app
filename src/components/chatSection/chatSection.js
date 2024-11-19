@@ -41,15 +41,32 @@ const ChatMessage = ({ currentUserNumber, currentUser, myNumber, onBackToList })
       // Fetch existing messages
       const fetchMessages = async () => {
         try {
+          // Retrieve the token from localStorage
+          const token = localStorage.getItem('token');
+        
+          // Check if the token exists
+          if (!token) {
+            throw new Error('No token found, please log in.');
+          }
+        
+          // Send the request with the Authorization header
           const response = await axios.post(
             'https://chat-app-backend-2vt3.onrender.com/api/conversation/getmessage',
             { participant2: currentUser },
-            { withCredentials: true }
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`, // Attach JWT token in the Authorization header
+                'Content-Type': 'application/json'  // Set content type for the request
+              }
+            }
           );
+        
+          // Set the messages received from the backend
           setMessages(response.data);
         } catch (error) {
           console.error('Error fetching messages:', error);
         }
+        
       };
       fetchMessages();
 

@@ -31,18 +31,33 @@ const ChatApp = () => {
   useEffect(() => {
     const getProfile = async () => {
       try {
+        // Retrieve the token from localStorage
+        const token = localStorage.getItem('token');
+        
+        // Check if the token exists
+        if (!token) {
+          throw new Error('No token found, please log in.');
+        }
+      
+        // Make the API request with the Authorization header
         const response = await axios.get(
           `https://chat-app-backend-2vt3.onrender.com/api/profile`,
-          { withCredentials: true }
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`, // Attach the JWT token in the Authorization header
+            },
+            withCredentials: true // If you still want to include credentials (like cookies) with the request
+          }
         );
-        
+      
+        // Handle the response and connect to the socket
         const newSocket = connectSocket(response.data.phoneNumber);
         setNumber(response.data.phoneNumber);
         setSocket(newSocket);
+      } catch (error) {
+        console.log("Error fetching profile", error);
       }
-      catch(error) {
-        console.log("Error fetching profile");
-      }
+      
     }
     getProfile();
   }, []);
