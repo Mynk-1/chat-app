@@ -42,7 +42,7 @@ const ChatMessage = ({ currentUserNumber, currentUser, myNumber, onBackToList })
       const fetchMessages = async () => {
         try {
           const response = await axios.post(
-            'https://chat-app-backend-weld-two.vercel.app/api/conversation/getmessage',
+            'https://chat-app-backend-2vt3.onrender.com/api/conversation/getmessage',
             { participant2: currentUser },
             { withCredentials: true }
           );

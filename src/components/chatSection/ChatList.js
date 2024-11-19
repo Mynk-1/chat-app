@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, PlusCircle, Copyright } from 'lucide-react';
+import { Search, PlusCircle } from 'lucide-react';
 import axios from 'axios';
 
 const ChatList = ({ setCurrentUser, socket, myNumber }) => {
@@ -26,7 +26,7 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
   const fetchChatList = async () => {
     console.log("Fetching chat list...");
     try {
-      const response = await axios.get('https://chat-app-backend-weld-two.vercel.app/api/get-contact', {
+      const response = await axios.get('https://chat-app-backend-2vt3.onrender.com/api/get-contact', {
         withCredentials: true,
       });
       setChats(response.data || []);
@@ -94,8 +94,8 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
   }, [socket]);
 
   return (
-    <div className="w-full max-w-md border-r border-gray-200 h-screen bg-white dark:bg-gray-800 dark:text-white shadow-sm flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-600 bg-green-50 dark:bg-green-900/20 transition-colors duration-300">
+    <div className="w-full max-w-md border-r border-gray-200 h-screen bg-white dark:bg-gray-800 dark:text-white">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-600">
         <div className="relative flex items-center gap-2">
           <div className="relative flex-1">
             <input
@@ -103,32 +103,32 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Enter phone number..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:border-green-500 dark:bg-gray-700 dark:text-white"
             />
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400 dark:text-gray-400" />
           </div>
           <button
             onClick={handleAddUser}
             disabled={isLoading}
-            className="flex items-center justify-center p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300 transform hover:scale-105"
+            className="flex items-center justify-center p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <PlusCircle className="h-5 w-5" />
           </button>
         </div>
 
         {showError && (
-          <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 rounded-lg text-sm animate-pulse">
+          <div className="mt-2 p-2 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 rounded-lg text-sm">
             {error}
           </div>
         )}
         {showMessage && (
-          <div className="mt-2 p-2 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded-lg text-sm animate-pulse">
+          <div className="mt-2 p-2 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded-lg text-sm">
             {showMessage}
           </div>
         )}
       </div>
 
-      <div className="overflow-y-auto flex-1 bg-gray-50 dark:bg-gray-900/20">
+      <div className="overflow-y-auto h-[calc(100vh-80px)]">
         {chats.length > 0 ? (
           chats.map((chat) => (
             <div
@@ -137,28 +137,28 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
                 setCurrentUser(chat.contactNumber)
                 socket.emit("updateUnreadMessageCount",{currentUser:chat.contactNumber,myNumber})
               }}
-              className="flex items-center p-4 border-b border-gray-100 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors duration-300 group"
+              className="flex items-center p-4 border-b border-gray-100 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex-shrink-0 flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-800 transition-colors duration-300">
-                <span className="text-green-600 dark:text-green-400 text-lg font-semibold group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex-shrink-0 flex items-center justify-center">
+                <span className="text-green-600 dark:text-green-400 text-lg font-semibold">
                   {chat.contactNumber.slice(-2)}
                 </span>
               </div>
               <div className="ml-4 flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     {formatPhoneNumber(chat.contactNumber)}
                   </h3>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {formatTime(chat.lastMessageTime)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 truncate group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors duration-300">
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                   {chat.lastMessage || 'No messages yet'}
                 </p>
               </div>
               {chat.unreadMessageCount > 0 && (
-                <div className="ml-2 bg-green-500 dark:bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center group-hover:bg-green-600 dark:group-hover:bg-green-700 transition-colors duration-300">
+                <div className="ml-2 bg-green-500 dark:bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {chat.unreadMessageCount}
                 </div>
               )}
@@ -167,14 +167,6 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
         ) : (
           <p className="p-4 text-gray-500 dark:text-gray-400 text-center">No chats available</p>
         )}
-      </div>
-
-      {/* Copyright Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-600 bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
-        <Copyright className="mr-2 h-4 w-4 text-green-600 dark:text-green-400" />
-        <span className="text-green-600 dark:text-green-400">
-          2024 Developed by Mayank. All rights reserved.
-        </span>
       </div>
     </div>
   );

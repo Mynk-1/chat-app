@@ -4,7 +4,7 @@ let socket;
 
 export const connectSocket = (phoneNumber) => {
   if (!socket) {
-    socket = io('https://chat-app-backend-weld-two.vercel.app', {
+    socket = io('https://chat-app-backend-2vt3.onrender.com', {
       transports: ['websocket'],
       withCredentials: true,
     });

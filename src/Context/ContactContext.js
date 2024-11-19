@@ -20,7 +20,7 @@ export const ContactProvider = ({ children }) => {
   const fetchContactList = async () => {
     try {
       const response = await axios.get(
-        `https://chat-app-backend-weld-two.vercel.app/api/get-contact`,
+        `https://chat-app-backend-2vt3.onrender.com/api/get-contact`,
         {
           withCredentials: true // Enables sending credentials with the request
         }
@@ -37,7 +37,7 @@ export const ContactProvider = ({ children }) => {
   const addContact = async (contactNumber) => {
     try {
       const response = await axios.post(
-        'https://chat-app-backend-weld-two.vercel.app/api/add-contact',
+        'https://chat-app-backend-2vt3.onrender.com/api/add-contact',
         { contactNumber },
         {
           withCredentials: true // Enables sending credentials with the request

@@ -32,10 +32,10 @@ const ChatApp = () => {
     const getProfile = async () => {
       try {
         const response = await axios.get(
-          `https://chat-app-backend-weld-two.vercel.app/api/profile`,
+          `https://chat-app-backend-2vt3.onrender.com/api/profile`,
           { withCredentials: true }
         );
-        console.log(response.data.phoneNumber)
+        
         const newSocket = connectSocket(response.data.phoneNumber);
         setNumber(response.data.phoneNumber);
         setSocket(newSocket);

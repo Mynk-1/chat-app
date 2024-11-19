@@ -19,12 +19,13 @@ const navigate = useNavigate();
 
     try {
       
-      const response = await fetch('https://chat-app-backend-weld-two.vercel.app/api/login', {
+      const response = await fetch('https://chat-app-backend-2vt3.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           phoneNumber
+          
         })
       });
 
