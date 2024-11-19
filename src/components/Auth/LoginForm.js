@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Phone } from 'lucide-react';
 import { ContactContext } from '../../Context/ContactContext';
 import { useNavigate} from "react-router-dom"
@@ -49,6 +49,12 @@ const navigate = useNavigate();
     }
     
   };
+
+  useEffect(()=>{
+    if(localStorage.getItem('token')){
+      navigate("/chat");
+    }
+  },[])
 
   return (
     <div className="min-h-screen flex justify-center  ">
