@@ -18,7 +18,7 @@ const navigate = useNavigate();
     setError('');
 
     try {
-      const response = await fetch('https://chat-app-backend-2vt3.onrender.com/api/login', {
+      const response = await fetch('https://chat-app-backend-7z2z.onrender.com/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // If you're still using credentials for cookies or other session-related headers

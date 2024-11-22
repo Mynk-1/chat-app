@@ -51,7 +51,7 @@ const ChatMessage = ({ currentUserNumber, currentUser, myNumber, onBackToList })
         
           // Send the request with the Authorization header
           const response = await axios.post(
-            'https://chat-app-backend-2vt3.onrender.com/api/conversation/getmessage',
+            'https://chat-app-backend-7z2z.onrender.com/api/conversation/getmessage',
             { participant2: currentUser },
             {
               headers: {

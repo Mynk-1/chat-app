@@ -36,7 +36,7 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
     
       // Send the request with the Authorization header
       const response = await axios.get(
-        'https://chat-app-backend-2vt3.onrender.com/api/get-contact',
+        'https://chat-app-backend-7z2z.onrender.com/api/get-contact',
         {
           headers: {
             'Authorization': `Bearer ${token}`,  // Attach JWT token in the Authorization header
