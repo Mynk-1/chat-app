@@ -37,7 +37,7 @@ export const ContactProvider = ({ children }) => {
   const addContact = async (contactNumber) => {
     try {
       const response = await axios.post(
-        'https://chat-app-backend-2vt3.onrender.com/api/add-contact',
+        'https://chat-app-backend-7z2z.onrender.com',
         { contactNumber },
         {
           withCredentials: true // Enables sending credentials with the request
