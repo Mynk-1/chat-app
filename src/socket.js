@@ -4,7 +4,7 @@ let socket;
 
 export const connectSocket = (phoneNumber) => {
   if (!socket) {
-    socket = io('https://chat-app-backend-2vt3.onrender.com', {
+    socket = io('https://chat-app-backend-7z2z.onrender.com', {
       transports: ['websocket'],
       withCredentials: true,
     });
