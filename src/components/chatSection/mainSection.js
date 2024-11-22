@@ -32,7 +32,7 @@ const ChatApp = () => {
     const getProfile = async () => {
       try {
         // Retrieve the token from localStorage
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         
         // Check if the token exists
         if (!token) {
@@ -41,7 +41,7 @@ const ChatApp = () => {
       
         // Make the API request with the Authorization header
         const response = await axios.get(
-          `https://chat-app-backend-2vt3.onrender.com/api/profile`,
+          `https://chat-app-backend-7z2z.onrender.com/api/profile`,
           {
             headers: {
               'Authorization': `Bearer ${token}`, // Attach the JWT token in the Authorization header
