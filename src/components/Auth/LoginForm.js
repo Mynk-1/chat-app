@@ -34,7 +34,7 @@ const navigate = useNavigate();
       }
     
       // Store the token in localStorage
-      localStorage.setItem('token', data.token); // Save the JWT token to localStorage
+      sessionStorage.setItem('token', data.token); // Save the JWT token to localStorage
     
       // Set user details in state or context (for example)
       setUserDetails(data.user);

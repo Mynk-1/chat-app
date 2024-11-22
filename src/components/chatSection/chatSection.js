@@ -42,7 +42,7 @@ const ChatMessage = ({ currentUserNumber, currentUser, myNumber, onBackToList })
       const fetchMessages = async () => {
         try {
           // Retrieve the token from localStorage
-          const token = localStorage.getItem('token');
+          const token = sessionStorage.getItem('token');
         
           // Check if the token exists
           if (!token) {

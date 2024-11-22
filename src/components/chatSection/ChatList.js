@@ -27,7 +27,7 @@ const ChatList = ({ setCurrentUser, socket, myNumber }) => {
     console.log("Fetching chat list...");
     try {
       // Retrieve the token from localStorage
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
     
       // Check if the token exists
       if (!token) {
