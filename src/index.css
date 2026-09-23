@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply bg-clay-bg dark:bg-clay-bgDark text-clay-text dark:text-clay-textDark;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
