@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { SocketProvider } from './context/SocketContext';
 import { ChatProvider } from './context/ChatContext';
 import { CallProvider } from './context/CallContext';
+import { ToastProvider } from './context/ToastContext';
 import LandingPage from './components/landing/LandingPage';
 import ChatApp from './components/chat/ChatApp';
 
@@ -43,11 +45,13 @@ const AppRoutes = () => {
         element={
           <RequireAuth>
             <SocketProvider>
-              <ChatProvider>
-                <CallProvider>
-                  <ChatApp />
-                </CallProvider>
-              </ChatProvider>
+              <ToastProvider>
+                <ChatProvider>
+                  <CallProvider>
+                    <ChatApp />
+                  </CallProvider>
+                </ChatProvider>
+              </ToastProvider>
             </SocketProvider>
           </RequireAuth>
         }
@@ -59,9 +63,11 @@ const AppRoutes = () => {
 
 const App = () => (
   <BrowserRouter>
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </SettingsProvider>
   </BrowserRouter>
 );
 

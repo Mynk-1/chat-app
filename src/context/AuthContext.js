@@ -11,8 +11,8 @@ export const AuthProvider = ({ children }) => {
   // page while /auth/me is still in flight.
   const [authChecked, setAuthChecked] = useState(false);
 
-  const login = useCallback(async (phoneNumber) => {
-    const { data } = await authApi.login(phoneNumber);
+  const verifyOtp = useCallback(async (phoneNumber, otp) => {
+    const { data } = await authApi.verifyOtp(phoneNumber, otp);
     setUser(data.user);
     return data.user;
   }, []);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, authChecked, login, logout, restoreSession }}>
+    <AuthContext.Provider value={{ user, authChecked, verifyOtp, logout, restoreSession }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Phone } from 'lucide-react';
 import ChatList from './ChatList';
 import ChatWindow from './ChatWindow';
-import CallHistoryList from '../calls/CallHistoryList';
 import IncomingCallModal from '../call/IncomingCallModal';
 import CallScreen from '../call/CallScreen';
+import Toast from '../common/Toast';
 import { useAuth } from '../../context/AuthContext';
+import { useChat } from '../../context/ChatContext';
 
 const ChatApp = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('chats'); // 'chats' | 'calls'
-  const [currentContact, setCurrentContact] = useState(null);
+  const { currentChat, selectChat, closeChat } = useChat();
   const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
   const [showChatList, setShowChatList] = useState(true);
 
@@ -24,13 +23,13 @@ const ChatApp = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSelectChat = (contactNumber) => {
-    setCurrentContact(contactNumber);
+  const handleSelectChat = (chat) => {
+    selectChat(chat);
     if (isMobileView) setShowChatList(false);
   };
 
   const handleBackToList = () => {
-    setCurrentContact(null);
+    closeChat();
     setShowChatList(true);
   };
 
@@ -45,51 +44,24 @@ const ChatApp = () => {
   return (
     <div className="flex h-screen bg-clay-bg dark:bg-clay-bgDark">
       {(isMobileView ? showChatList : true) && (
-        <div className={`${isMobileView ? 'w-full' : 'w-1/3 max-w-md'} ${isMobileView && !showChatList ? 'hidden' : ''} flex flex-col`}>
-          <div className="p-3">
-            <div className="flex bg-clay-surface dark:bg-clay-surfaceDark rounded-full p-1 shadow-clay-inset dark:shadow-clay-dark-inset">
-              {[
-                { key: 'chats', label: 'Chats', icon: MessageCircle },
-                { key: 'calls', label: 'Calls', icon: Phone },
-              ].map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full text-sm font-medium transition-shadow ${
-                    activeTab === key
-                      ? 'bg-clay-primary text-white shadow-clay-sm'
-                      : 'text-clay-muted dark:text-clay-mutedDark'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 min-h-0">
-            {activeTab === 'chats' ? (
-              <ChatList onSelectChat={handleSelectChat} />
-            ) : (
-              <CallHistoryList />
-            )}
-          </div>
+        <div
+          className={`${isMobileView ? 'w-full' : 'w-1/3 max-w-md border-r border-clay-muted/20 dark:border-clay-mutedDark/20'} ${
+            isMobileView && !showChatList ? 'hidden' : ''
+          } flex flex-col`}
+        >
+          <ChatList onSelectChat={handleSelectChat} />
         </div>
       )}
 
       {(isMobileView ? !showChatList : true) && (
         <div className={`${isMobileView ? 'w-full' : 'w-2/3 flex-1'}`}>
-          <ChatWindow
-            myNumber={user.phoneNumber}
-            currentContact={currentContact}
-            onBackToList={handleBackToList}
-          />
+          <ChatWindow currentChat={currentChat} onBackToList={handleBackToList} />
         </div>
       )}
 
       <IncomingCallModal />
       <CallScreen />
+      <Toast />
     </div>
   );
 };

@@ -6,3 +6,14 @@ body {
   @apply bg-clay-bg dark:bg-clay-bgDark text-clay-text dark:text-clay-textDark;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* Fully hides the scrollbar on the chat/call lists and message thread while
+   the element stays scrollable (mouse wheel, touch, keyboard all still work). */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge/IE */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge Chromium */
+}

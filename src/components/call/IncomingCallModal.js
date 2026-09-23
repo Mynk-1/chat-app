@@ -6,11 +6,11 @@ import { getAvatarColor, getInitials, getDisplayName } from '../../utils/avatar'
 
 const IncomingCallModal = () => {
   const { callState, activeCall, acceptCall, rejectCall } = useCall();
-  const { contacts } = useChat();
+  const { chats } = useChat();
 
   if (callState !== 'incoming' || !activeCall) return null;
 
-  const contact = contacts.find((c) => c.contactNumber === activeCall.contactNumber) || {
+  const contact = chats.find((c) => c.type === 'contact' && c.contactNumber === activeCall.contactNumber) || {
     contactNumber: activeCall.contactNumber,
   };
 

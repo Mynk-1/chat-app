@@ -12,20 +12,66 @@ const CallContext = createContext(null);
 export const CallProvider = ({ children }) => {
   const socket = useSocket();
 
-  const [callState, setCallState] = useState('idle'); // idle | outgoing | incoming | connected
+  const [callState, setCallState] = useState('idle'); // idle | outgoing | incoming | connected | ended
   const [activeCall, setActiveCall] = useState(null); // { callId, contactNumber, type, direction }
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const [callError, setCallError] = useState('');
+  const [endReason, setEndReason] = useState('');
+  const [connectedDuration, setConnectedDuration] = useState(0);
 
   const pcRef = useRef(null);
   const localStreamRef = useRef(null);
   const activeCallRef = useRef(null);
   activeCallRef.current = activeCall;
+  const callStateRef = useRef(callState);
+  callStateRef.current = callState;
+  const endedTimeoutRef = useRef(null);
+  const durationIntervalRef = useRef(null);
 
+  // Starts counting once media is actually flowing on a connected call.
+  useEffect(() => {
+    if (remoteStream && callState === 'connected' && !durationIntervalRef.current) {
+      durationIntervalRef.current = setInterval(() => setConnectedDuration((d) => d + 1), 1000);
+    }
+  }, [remoteStream, callState]);
+
+  // Stops media/closes the peer connection immediately, but leaves
+  // `activeCall` populated and callState at 'ended' for a few seconds so a
+  // brief "call ended" screen can show before snapping back to idle. The
+  // final `connectedDuration` is kept so that screen can show it.
+  const finishCall = useCallback((reason) => {
+    clearInterval(durationIntervalRef.current);
+    durationIntervalRef.current = null;
+
+    pcRef.current?.close();
+    pcRef.current = null;
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+
+    setLocalStream(null);
+    setRemoteStream(null);
+    setIsMuted(false);
+    setIsCameraOff(false);
+    setEndReason(reason);
+    setCallState('ended');
+
+    clearTimeout(endedTimeoutRef.current);
+    endedTimeoutRef.current = setTimeout(() => {
+      setCallState('idle');
+      setActiveCall(null);
+      setEndReason('');
+      setConnectedDuration(0);
+    }, 3000);
+  }, []);
+
+  // Full, immediate reset — used when a call attempt fails before ever
+  // showing anything worth lingering on (e.g. media permission denied).
   const cleanup = useCallback(() => {
+    clearTimeout(endedTimeoutRef.current);
+    clearInterval(durationIntervalRef.current);
+    durationIntervalRef.current = null;
     pcRef.current?.close();
     pcRef.current = null;
     localStreamRef.current?.getTracks().forEach((track) => track.stop());
@@ -37,6 +83,8 @@ export const CallProvider = ({ children }) => {
     setActiveCall(null);
     setIsMuted(false);
     setIsCameraOff(false);
+    setEndReason('');
+    setConnectedDuration(0);
   }, []);
 
   const createPeerConnection = useCallback(
@@ -98,7 +146,6 @@ export const CallProvider = ({ children }) => {
   const startCall = useCallback(
     (contactNumber, type) => {
       if (!socket || callState !== 'idle') return;
-      setCallError('');
       setActiveCall({ callId: null, contactNumber, type, direction: 'outgoing' });
       setCallState('outgoing');
       socket.emit(EVENTS.CALL_INITIATE, { recipient: contactNumber, type });
@@ -115,29 +162,29 @@ export const CallProvider = ({ children }) => {
       setCallState('connected');
     } catch (error) {
       console.error('Failed to accept call (media permissions?)', error);
-      setCallError('Could not access camera/microphone');
       socket?.emit(EVENTS.CALL_REJECT, { callId: call.callId });
-      cleanup();
+      finishCall('failed');
     }
-  }, [socket, prepareForAnswer, cleanup]);
+  }, [socket, prepareForAnswer, finishCall]);
 
   const rejectCall = useCallback(() => {
     const call = activeCallRef.current;
     if (call?.callId) socket?.emit(EVENTS.CALL_REJECT, { callId: call.callId });
-    cleanup();
-  }, [socket, cleanup]);
+    finishCall('declined');
+  }, [socket, finishCall]);
 
   const endCall = useCallback(() => {
     const call = activeCallRef.current;
     if (!call) return;
 
-    if (call.callId && callState === 'connected') {
+    const wasConnected = callStateRef.current === 'connected';
+    if (call.callId && wasConnected) {
       socket?.emit(EVENTS.CALL_END, { callId: call.callId });
     } else if (call.callId) {
       socket?.emit(EVENTS.CALL_CANCEL, { callId: call.callId });
     }
-    cleanup();
-  }, [socket, callState, cleanup]);
+    finishCall(wasConnected ? 'completed' : 'cancelled');
+  }, [socket, finishCall]);
 
   const toggleMute = useCallback(() => {
     const stream = localStreamRef.current;
@@ -164,7 +211,6 @@ export const CallProvider = ({ children }) => {
         socket.emit(EVENTS.CALL_REJECT, { callId });
         return;
       }
-      setCallError('');
       setActiveCall({ callId, contactNumber: from, type, direction: 'incoming' });
       setCallState('incoming');
     };
@@ -178,9 +224,8 @@ export const CallProvider = ({ children }) => {
         await startOffer(callId, call.type);
       } catch (error) {
         console.error('Failed to start call (media permissions?)', error);
-        setCallError('Could not access camera/microphone');
         socket.emit(EVENTS.CALL_END, { callId });
-        cleanup();
+        finishCall('failed');
       }
     };
 
@@ -205,32 +250,33 @@ export const CallProvider = ({ children }) => {
       }
     };
 
-    const handleTerminalEvent = (reasonLabel) => () => {
-      if (reasonLabel) console.log('Call ended:', reasonLabel);
-      cleanup();
+    const handleRejected = () => finishCall('declined');
+    const handleCancelled = () => finishCall('cancelled');
+    const handleEnded = ({ reason } = {}) => {
+      if (reason === 'timeout') finishCall('missed');
+      else if (reason === 'offline') finishCall('offline');
+      else finishCall('completed');
     };
+    const handleBusy = () => finishCall('busy');
 
     socket.on(EVENTS.CALL_INCOMING, handleIncoming);
     socket.on(EVENTS.CALL_ACCEPTED, handleAccepted);
     socket.on(EVENTS.CALL_SIGNAL, handleSignal);
-    socket.on(EVENTS.CALL_REJECTED, handleTerminalEvent('rejected'));
-    socket.on(EVENTS.CALL_CANCELLED, handleTerminalEvent('cancelled'));
-    socket.on(EVENTS.CALL_ENDED, handleTerminalEvent('ended'));
-    socket.on(EVENTS.CALL_BUSY, () => {
-      setCallError('That contact is on another call');
-      cleanup();
-    });
+    socket.on(EVENTS.CALL_REJECTED, handleRejected);
+    socket.on(EVENTS.CALL_CANCELLED, handleCancelled);
+    socket.on(EVENTS.CALL_ENDED, handleEnded);
+    socket.on(EVENTS.CALL_BUSY, handleBusy);
 
     return () => {
       socket.off(EVENTS.CALL_INCOMING, handleIncoming);
       socket.off(EVENTS.CALL_ACCEPTED, handleAccepted);
       socket.off(EVENTS.CALL_SIGNAL, handleSignal);
-      socket.off(EVENTS.CALL_REJECTED);
-      socket.off(EVENTS.CALL_CANCELLED);
-      socket.off(EVENTS.CALL_ENDED);
-      socket.off(EVENTS.CALL_BUSY);
+      socket.off(EVENTS.CALL_REJECTED, handleRejected);
+      socket.off(EVENTS.CALL_CANCELLED, handleCancelled);
+      socket.off(EVENTS.CALL_ENDED, handleEnded);
+      socket.off(EVENTS.CALL_BUSY, handleBusy);
     };
-  }, [socket, startOffer, cleanup]);
+  }, [socket, startOffer, finishCall]);
 
   // If the socket itself drops mid-call, don't leave the UI stuck.
   useEffect(() => {
@@ -246,7 +292,8 @@ export const CallProvider = ({ children }) => {
         remoteStream,
         isMuted,
         isCameraOff,
-        callError,
+        endReason,
+        connectedDuration,
         startCall,
         acceptCall,
         rejectCall,
